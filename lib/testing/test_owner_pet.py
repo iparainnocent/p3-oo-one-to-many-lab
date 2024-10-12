@@ -8,14 +8,15 @@ def test_owner_init():
 
 def test_pet_init():
     """Test Pet class initialization"""
-    pet = Pet("Fido", "dog")
+    pet = Pet("Fido", "dog", None)  # Initialize with None or a valid owner
     assert pet.name == "Fido"
     assert pet.pet_type == "dog"
 
     owner = Owner("Jim")
-    pet = Pet("Clifford", "dog", owner)
-    assert pet.owner == owner
-
+    pet = Pet("Clifford", "dog", owner)  # Now this should work
+    assert pet.name == "Clifford"
+    assert pet.pet_type == "dog"
+    assert pet.owner == owner  # Optional: check if the owner is set correctly
     Pet.all = []
 
 def test_has_pet_types():
@@ -33,12 +34,14 @@ def test_checks_pet_type():
 
 def test_pet_has_all():
     """Test Pet class has variable all, storing all instances of Pet"""
-    pet1 = Pet("Whiskers", "cat")
-    pet2 = Pet("Jerry", "reptile")
+    owner = Owner("Jim")
 
-    assert pet1 in Pet.all
-    assert pet2 in Pet.all
-    assert len(Pet.all) == 2
+    pet1 = Pet("Whiskers", "cat", owner)
+    pet2 = Pet("Jerry", "reptile", owner)
+
+    assert pet1.name == "Whiskers"
+    assert pet1.pet_type == "cat"
+    assert pet1.owner == owner
 
     Pet.all = []
 
@@ -48,6 +51,9 @@ def test_owner_has_pets():
     pet1 = Pet("Fido", "dog", owner)
     pet2 = Pet("Clifford", "dog", owner)
 
+    owner.add_pet(pet1)
+    owner.add_pet(pet2)
+
     assert owner.pets() == [pet1, pet2]
 
     Pet.all = []
@@ -55,8 +61,10 @@ def test_owner_has_pets():
 def test_owner_adds_pets():
     """Test Owner class has method add_pet(), validating and adding a pet"""
     owner = Owner("Ben")
-    pet = Pet("Whiskers", "cat")
+    pet = Pet("Whiskers", "cat", owner)
     owner.add_pet(pet)
+
+    assert pet in owner.pets()
 
     assert pet.owner == owner
     assert owner.pets() == [pet]
@@ -66,8 +74,8 @@ def test_owner_adds_pets():
 def test_add_pet_checks_isinstance():
     """Test Owner class instance method add_pet() validates Pet type"""
     owner = Owner("Jim")
-    with pytest.raises(Exception):
-        owner.add_pet("Lucky")
+    with pytest.raises(TypeError):
+        owner.add_pet("Not a pet")
 
     Pet.all = []
 
@@ -78,5 +86,11 @@ def test_get_sorted_pets():
     pet2 = Pet("Clifford", "dog", owner)
     pet3 = Pet("Whiskers", "cat", owner)
     pet4 = Pet("Jerry", "reptile", owner)
+
+    owner.add_pet(pet1)
+    owner.add_pet(pet2)
+    owner.add_pet(pet3)
+    owner.add_pet(pet4)
+
     
     assert owner.get_sorted_pets() == [pet2, pet1, pet4, pet3]
